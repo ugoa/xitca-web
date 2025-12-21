@@ -327,8 +327,17 @@ macro_rules! borrow_req_impl {
 
 borrow_req_impl!(Method);
 borrow_req_impl!(Uri);
-borrow_req_impl!(HeaderMap);
+// borrow_req_impl!(HeaderMap);
 borrow_req_impl!(Extensions);
+
+impl<'a, Ext> FromRequest<'a, Request<Ext>> for &'a HeaderMap {
+    type Type<'b> = &'b HeaderMap;
+    type Error = Infallible;
+    #[inline]
+    async fn from_request(req: &'a Request<Ext>) -> Result<Self, Self::Error> {
+        Ok(req.borrow())
+    }
+}
 
 impl<'a, Ext> FromRequest<'a, Request<Ext>> for &'a Request<Ext>
 where
