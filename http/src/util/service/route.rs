@@ -20,7 +20,11 @@ macro_rules! method {
     };
 }
 
-method!(get, GET);
+pub const fn get<R>(route: R) -> Route<R, MethodNotAllowedBuilder<R>, 1> {
+    Route::_new([Method::GET], route)
+}
+
+// method!(get, GET);
 method!(post, POST);
 method!(put, PUT);
 method!(delete, DELETE);
@@ -100,7 +104,13 @@ impl<R, N, const M: usize> Route<R, N, M> {
         }
     }
 
-    route_method!(get, GET);
+    #[doc = concat!("appending [Method::",stringify!(GET),"] guarded route to current Route.")]
+    #[doc = r" Act as a shortcut of [Route::next]."]
+    pub fn get<R1>(self, get: R1) -> Route<R, Route<R1, N, 1>, M> {
+        self.next(Route::_new([Method::GET], get))
+    }
+
+    // route_method!(get, GET);
     route_method!(post, POST);
     route_method!(put, PUT);
     route_method!(delete, DELETE);

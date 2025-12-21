@@ -328,11 +328,24 @@ macro_rules! async_fn_impl {
     }
 }
 
+impl<Func, Fut, A, B, C, D> AsyncFn2<(A, B, C, D)> for Func
+where
+    Func: Fn(A, B, C, D) -> Fut,
+    Fut: Future,
+{
+    type Output = Fut::Output;
+    type Future = Fut;
+    #[inline]
+    fn call(&self, (A, B, C, D): (A, B, C, D)) -> Self::Future {
+        self(A, B, C, D)
+    }
+}
+
 async_fn_impl! {}
 async_fn_impl! { A }
 async_fn_impl! { A, B }
 async_fn_impl! { A, B, C }
-async_fn_impl! { A, B, C, D }
+// async_fn_impl! { A, B, C, D }
 async_fn_impl! { A, B, C, D, E }
 async_fn_impl! { A, B, C, D, E, F }
 async_fn_impl! { A, B, C, D, E, F, G }
