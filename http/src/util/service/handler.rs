@@ -148,10 +148,33 @@ macro_rules! from_req_impl {
     }
 }
 
+impl<'a, Req, A, B, C, D> FromRequest<'a, Req> for (A, B, C, D)
+where
+    A: FromRequest<'a, Req>,
+    B: FromRequest<'a, Req>,
+    A::Error: From<B::Error>,
+    C: FromRequest<'a, Req>,
+    A::Error: From<C::Error>,
+    D: FromRequest<'a, Req>,
+    A::Error: From<D::Error>,
+{
+    type Type<'r> = (A::Type<'r>, B::Type<'r>, C::Type<'r>, D::Type<'r>);
+    type Error = A::Error;
+    #[inline]
+    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
+        Ok((
+            A::from_request(req).await?,
+            B::from_request(req).await?,
+            C::from_request(req).await?,
+            D::from_request(req).await?,
+        ))
+    }
+}
+
 from_req_impl! { A, }
 from_req_impl! { A, B, }
 from_req_impl! { A, B, C, }
-from_req_impl! { A, B, C, D, }
+// from_req_impl! { A, B, C, D, }
 from_req_impl! { A, B, C, D, E, }
 from_req_impl! { A, B, C, D, E, F, }
 from_req_impl! { A, B, C, D, E, F, G, }
@@ -221,10 +244,41 @@ macro_rules! responder_impl {
     }
 }
 
+#[allow(non_snake_case)]
+impl<Req, A, B, C, D> Responder<Req> for (A, B, C, D)
+where
+    A: Responder<Req>,
+    B: Responder<Req, Response = A::Response>,
+    A::Error: From<B::Error>,
+    C: Responder<Req, Response = A::Response>,
+    A::Error: From<C::Error>,
+    D: Responder<Req, Response = A::Response>,
+    A::Error: From<D::Error>,
+{
+    type Response = A::Response;
+    type Error = A::Error;
+    async fn respond(self, req: Req) -> Result<Self::Response, Self::Error> {
+        let (A, B, C, D) = self;
+        let res = A.respond(req).await?;
+        let res = B.map(res)?;
+        let res = C.map(res)?;
+        let res = D.map(res)?;
+        Ok(res)
+    }
+    fn map(self, mut res: Self::Response) -> Result<Self::Response, Self::Error> {
+        let (A, B, C, D) = self;
+        res = A.map(res)?;
+        res = B.map(res)?;
+        res = C.map(res)?;
+        res = D.map(res)?;
+        Ok(res)
+    }
+}
+
 responder_impl! { A, }
 responder_impl! { A, B, }
 responder_impl! { A, B, C, }
-responder_impl! { A, B, C, D, }
+// responder_impl! { A, B, C, D, }
 responder_impl! { A, B, C, D, E, }
 responder_impl! { A, B, C, D, E, F, }
 
