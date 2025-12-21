@@ -33,9 +33,9 @@ websocket = ["http-ws"]
 dangerous = []
 
 [dependencies]
-xitca-http = { version = "0.7.0", default-features = false, features = ["runtime"] }
-xitca-io = "0.4.0"
-xitca-unsafe-collection = "0.2.0"
+xitca-http = { version = "0.7.0", path = "../http", default-features = false, features = ["runtime"] }
+xitca-io = { version = "0.4.0", path = "../io"}
+xitca-unsafe-collection = {version = "0.2.0", path = "../unsafe_collection/"}
 
 futures-core = { version = "0.3.17", default-features = false }
 futures-sink = { version = "0.3.17", default-features = false }

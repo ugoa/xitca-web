@@ -13,7 +13,7 @@ readme= "README.md"
 workspace = true
 
 [dependencies]
-xitca-unsafe-collection = "0.2.0"
+xitca-unsafe-collection = { version = "0.2.0", path = "../unsafe_collection"}
 
 [dev-dependencies]
 criterion = "0.5"

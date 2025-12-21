@@ -10,16 +10,16 @@ workspace = true
 io-uring = ["xitca-http/io-uring", "xitca-server/io-uring"]
 
 [dependencies]
-xitca-client = { version = "0.1", features = ["http2", "http3", "websocket", "dangerous"] }
-xitca-http = { version = "0.7", features = ["http2", "http3"] }
-xitca-codegen = "0.4"
-xitca-io = "0.4.1"
-xitca-server = { version = "0.5", features = ["quic"] }
-xitca-service = "0.3.0"
-xitca-unsafe-collection = "0.2"
-xitca-web = { version = "0.7", features = ["codegen"] }
+xitca-client = { version = "0.1", features = ["http2", "http3", "websocket", "dangerous"], path = "../client" }
+xitca-http = { version = "0.7", features = ["http2", "http3"], path = "../http" }
+xitca-codegen = {version = "0.4", path = "../codegen"}
+xitca-io = {version = "0.4.1", path = "../io"}
+xitca-server = { version = "0.5", features = ["quic"] , path = "../server"}
+xitca-service = {version = "0.3.0", path = "../service"}
+xitca-unsafe-collection = {version = "0.2", path = "../unsafe_collection"}
+xitca-web = { version = "0.7", features = ["codegen"], path = "../web" }
 
-http-ws = { version = "0.4", features = ["stream"] }
+http-ws = { version = "0.4", features = ["stream"], path = "../http-ws" }
 
 async-stream = "0.3"
 futures-util = "0.3.17"

@@ -19,7 +19,7 @@ runtime-uring = ["tokio-uring"]
 quic = ["quinn", "runtime"]
 
 [dependencies]
-xitca-unsafe-collection = { version = "0.2.0", features = ["bytes"] }
+xitca-unsafe-collection = { version = "0.2.0", features = ["bytes"], path = "../unsafe_collection/" }
 
 bytes = "1.4"
 

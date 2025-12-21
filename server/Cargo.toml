@@ -16,9 +16,9 @@ quic = ["xitca-io/quic"]
 io-uring = ["tokio-uring"]
 
 [dependencies]
-xitca-io = { version = "0.4.0", features = ["runtime"] }
-xitca-service = { version = "0.3.0", features = ["alloc"] }
-xitca-unsafe-collection = "0.2.0"
+xitca-io = { version = "0.4.0", features = ["runtime"], path = "../io" }
+xitca-service = { version = "0.3.0", features = ["alloc"], path = "../service" }
+xitca-unsafe-collection = {version = "0.2.0", path = "../unsafe_collection"}
 
 tokio = { version = "1.47.1", features = ["sync", "time"] }
 tracing = { version = "0.1.40", default-features = false }
