@@ -153,46 +153,10 @@ from_req_impl! { A, B, }
 from_req_impl! { A, B, C, }
 from_req_impl! { A, B, C, D, }
 from_req_impl! { A, B, C, D, E, }
-// from_req_impl! { A, B, C, D, E, F, }
+from_req_impl! { A, B, C, D, E, F, }
 from_req_impl! { A, B, C, D, E, F, G, }
 from_req_impl! { A, B, C, D, E, F, G, H, }
 from_req_impl! { A, B, C, D, E, F, G, H, I, }
-
-impl<'a, Req, A, B, C, D, E, F> FromRequest<'a, Req> for (A, B, C, D, E, F)
-where
-    A: FromRequest<'a, Req>,
-    B: FromRequest<'a, Req>,
-    A::Error: From<B::Error>,
-    C: FromRequest<'a, Req>,
-    A::Error: From<C::Error>,
-    D: FromRequest<'a, Req>,
-    A::Error: From<D::Error>,
-    E: FromRequest<'a, Req>,
-    A::Error: From<E::Error>,
-    F: FromRequest<'a, Req>,
-    A::Error: From<F::Error>,
-{
-    type Type<'r> = (
-        A::Type<'r>,
-        B::Type<'r>,
-        C::Type<'r>,
-        D::Type<'r>,
-        E::Type<'r>,
-        F::Type<'r>,
-    );
-    type Error = A::Error;
-    #[inline]
-    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
-        Ok((
-            A::from_request(req).await?,
-            B::from_request(req).await?,
-            C::from_request(req).await?,
-            D::from_request(req).await?,
-            E::from_request(req).await?,
-            F::from_request(req).await?,
-        ))
-    }
-}
 
 /// Make Response with ownership of Req.
 /// The Output type is what returns from [handler_service] function.
@@ -370,23 +334,10 @@ async_fn_impl! { A, B }
 async_fn_impl! { A, B, C }
 async_fn_impl! { A, B, C, D }
 async_fn_impl! { A, B, C, D, E }
-// async_fn_impl! { A, B, C, D, E, F }
+async_fn_impl! { A, B, C, D, E, F }
 async_fn_impl! { A, B, C, D, E, F, G }
 async_fn_impl! { A, B, C, D, E, F, G, H }
 async_fn_impl! { A, B, C, D, E, F, G, H, I }
-
-impl<Func, Fut, A, B, C, D, E, F> AsyncFn2<(A, B, C, D, E, F)> for Func
-where
-    Func: Fn(A, B, C, D, E, F) -> Fut,
-    Fut: Future,
-{
-    type Output = Fut::Output;
-    type Future = Fut;
-    #[inline]
-    fn call(&self, (A, B, C, D, E, F): (A, B, C, D, E, F)) -> Self::Future {
-        self(A, B, C, D, E, F)
-    }
-}
 
 #[cfg(test)]
 mod test {
