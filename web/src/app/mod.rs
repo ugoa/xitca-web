@@ -294,7 +294,7 @@ impl<Obj, CF> App<AppRouter<Obj>, CF> {
     /// ```
     pub fn at<F, C, B>(mut self, path: &'static str, builder: F) -> Self
     where
-        F: RouteGen + Service + Send + Sync,
+        F: Service + Send + Sync + RouteGen,
         F::Response: for<'r> Service<WebContext<'r, C, B>>,
         for<'r> WebContext<'r, C, B>: IntoObject<F::Route<F>, (), Object = Obj>,
     {

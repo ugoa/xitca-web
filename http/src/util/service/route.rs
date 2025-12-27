@@ -6,7 +6,10 @@ use std::error;
 
 use xitca_service::{Service, ready::ReadyService};
 
-use crate::http::{BorrowReq, Method};
+use crate::{
+    http::{BorrowReq, Method},
+    util::service::handler::{AsyncFn2, HandlerService},
+};
 
 use super::router::RouterError;
 
@@ -23,6 +26,14 @@ macro_rules! method {
 pub const fn get<R>(route: R) -> Route<R, MethodNotAllowedBuilder<R>, 1> {
     Route::_new([Method::GET], route)
 }
+
+// pub const fn my_get<R, F, T>(func: F) -> Route<R, MethodNotAllowedBuilder<R>, 1>
+// where
+//     F: AsyncFn2<T> + Clone,
+// {
+//     let route = HandlerService::new(func);
+//     Route::_new([Method::GET], route)
+// }
 
 // method!(get, GET);
 method!(post, POST);
