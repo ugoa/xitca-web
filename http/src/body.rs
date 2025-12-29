@@ -460,10 +460,16 @@ macro_rules! res_bytes_impl {
 res_bytes_impl!(Bytes);
 res_bytes_impl!(BytesMut);
 res_bytes_impl!(&'static [u8]);
-res_bytes_impl!(&'static str);
+// res_bytes_impl!(&'static str);
 res_bytes_impl!(Box<[u8]>);
 res_bytes_impl!(Vec<u8>);
 res_bytes_impl!(String);
+
+impl<B> From<&'static str> for ResponseBody<B> {
+    fn from(item: &'static str) -> Self {
+        Self::bytes(item)
+    }
+}
 
 impl<B> From<Box<str>> for ResponseBody<B> {
     fn from(str: Box<str>) -> Self {

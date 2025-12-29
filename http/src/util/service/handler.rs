@@ -171,7 +171,19 @@ where
     }
 }
 
-from_req_impl! { A, }
+impl<'a, Req, A> FromRequest<'a, Req> for (A,)
+where
+    A: FromRequest<'a, Req>,
+{
+    type Type<'r> = (A::Type<'r>,);
+    type Error = A::Error;
+    #[inline]
+    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
+        Ok((A::from_request(req).await?,))
+    }
+}
+
+// from_req_impl! { A, }
 from_req_impl! { A, B, }
 from_req_impl! { A, B, C, }
 // from_req_impl! { A, B, C, D, }
@@ -404,7 +416,7 @@ where
     }
 }
 
-async_fn_impl! {}
+// async_fn_impl! {}
 async_fn_impl! { A }
 async_fn_impl! { A, B }
 async_fn_impl! { A, B, C }
@@ -414,6 +426,19 @@ async_fn_impl! { A, B, C, D, E, F }
 async_fn_impl! { A, B, C, D, E, F, G }
 async_fn_impl! { A, B, C, D, E, F, G, H }
 async_fn_impl! { A, B, C, D, E, F, G, H, I }
+
+impl<Func, Fut> AsyncFn2<()> for Func
+where
+    Func: Fn() -> Fut,
+    Fut: Future,
+{
+    type Output = Fut::Output;
+    type Future = Fut;
+    #[inline]
+    fn call(&self, (): ()) -> Self::Future {
+        self()
+    }
+}
 
 #[cfg(test)]
 mod test {

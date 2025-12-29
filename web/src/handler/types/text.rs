@@ -46,7 +46,20 @@ macro_rules! text_utf8 {
     };
 }
 
-text_utf8!(&'static str);
+impl<'r, C, B> Responder<WebContext<'r, C, B>> for &'static str {
+    type Response = WebResponse;
+    type Error = Error;
+    #[inline]
+    async fn respond(self, ctx: WebContext<'r, C, B>) -> Result<Self::Response, Self::Error> {
+        Text(self).respond(ctx).await
+    }
+    #[inline]
+    fn map(self, res: Self::Response) -> Result<Self::Response, Self::Error> {
+        Responder::<WebContext<'r, C, B>>::map(Text(self), res)
+    }
+}
+
+// text_utf8!(&'static str);
 text_utf8!(String);
 text_utf8!(Box<str>);
 text_utf8!(std::borrow::Cow<'static, str>);
