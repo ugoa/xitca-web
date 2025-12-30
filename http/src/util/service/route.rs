@@ -27,14 +27,6 @@ pub const fn get<R>(route: R) -> Route<R, MethodNotAllowedBuilder<R>, 1> {
     Route::_new([Method::GET], route)
 }
 
-// pub const fn my_get<R, F, T>(func: F) -> Route<R, MethodNotAllowedBuilder<R>, 1>
-// where
-//     F: AsyncFn2<T> + Clone,
-// {
-//     let route = HandlerService::new(func);
-//     Route::_new([Method::GET], route)
-// }
-
 // method!(get, GET);
 method!(post, POST);
 method!(put, PUT);

@@ -7,10 +7,7 @@ async fn hi() -> &'static str {
 }
 
 fn main() -> std::io::Result<()> {
-    App::new()
-        .at("/", get(handler_service(hi)))
-        .serve()
-        .bind("127.0.0.1:8080")?
-        .run()
-        .wait()
+    let a = App::new().at("/", get(handler_service(hi)));
+
+    a.serve().bind("127.0.0.1:8080")?.run().wait()
 }
