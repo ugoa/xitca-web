@@ -148,6 +148,28 @@ macro_rules! from_req_impl {
     }
 }
 
+// from_req_impl! { A, }
+from_req_impl! { A, B, }
+from_req_impl! { A, B, C, }
+// from_req_impl! { A, B, C, D, }
+from_req_impl! { A, B, C, D, E, }
+from_req_impl! { A, B, C, D, E, F, }
+from_req_impl! { A, B, C, D, E, F, G, }
+from_req_impl! { A, B, C, D, E, F, G, H, }
+from_req_impl! { A, B, C, D, E, F, G, H, I, }
+
+impl<'a, Req, A> FromRequest<'a, Req> for (A,)
+where
+    A: FromRequest<'a, Req>,
+{
+    type Type<'r> = (A::Type<'r>,);
+    type Error = A::Error;
+    #[inline]
+    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
+        Ok((A::from_request(req).await?,))
+    }
+}
+
 impl<'a, Req, A, B, C, D> FromRequest<'a, Req> for (A, B, C, D)
 where
     A: FromRequest<'a, Req>,
@@ -170,28 +192,6 @@ where
         ))
     }
 }
-
-impl<'a, Req, A> FromRequest<'a, Req> for (A,)
-where
-    A: FromRequest<'a, Req>,
-{
-    type Type<'r> = (A::Type<'r>,);
-    type Error = A::Error;
-    #[inline]
-    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
-        Ok((A::from_request(req).await?,))
-    }
-}
-
-// from_req_impl! { A, }
-from_req_impl! { A, B, }
-from_req_impl! { A, B, C, }
-// from_req_impl! { A, B, C, D, }
-from_req_impl! { A, B, C, D, E, }
-from_req_impl! { A, B, C, D, E, F, }
-from_req_impl! { A, B, C, D, E, F, G, }
-from_req_impl! { A, B, C, D, E, F, G, H, }
-from_req_impl! { A, B, C, D, E, F, G, H, I, }
 
 /// Make Response with ownership of Req.
 /// The Output type is what returns from [handler_service] function.
