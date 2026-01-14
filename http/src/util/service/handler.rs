@@ -148,15 +148,50 @@ macro_rules! from_req_impl {
     }
 }
 
-from_req_impl! { A, }
+// from_req_impl! { A, }
 from_req_impl! { A, B, }
 from_req_impl! { A, B, C, }
-from_req_impl! { A, B, C, D, }
+// from_req_impl! { A, B, C, D, }
 from_req_impl! { A, B, C, D, E, }
 from_req_impl! { A, B, C, D, E, F, }
 from_req_impl! { A, B, C, D, E, F, G, }
 from_req_impl! { A, B, C, D, E, F, G, H, }
 from_req_impl! { A, B, C, D, E, F, G, H, I, }
+
+impl<'a, Req, A> FromRequest<'a, Req> for (A,)
+where
+    A: FromRequest<'a, Req>,
+{
+    type Type<'r> = (A::Type<'r>,);
+    type Error = A::Error;
+    #[inline]
+    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
+        Ok((A::from_request(req).await?,))
+    }
+}
+
+impl<'a, Req, A, B, C, D> FromRequest<'a, Req> for (A, B, C, D)
+where
+    A: FromRequest<'a, Req>,
+    B: FromRequest<'a, Req>,
+    A::Error: From<B::Error>,
+    C: FromRequest<'a, Req>,
+    A::Error: From<C::Error>,
+    D: FromRequest<'a, Req>,
+    A::Error: From<D::Error>,
+{
+    type Type<'r> = (A::Type<'r>, B::Type<'r>, C::Type<'r>, D::Type<'r>);
+    type Error = A::Error;
+    #[inline]
+    async fn from_request(req: &'a Req) -> Result<Self, Self::Error> {
+        Ok((
+            A::from_request(req).await?,
+            B::from_request(req).await?,
+            C::from_request(req).await?,
+            D::from_request(req).await?,
+        ))
+    }
+}
 
 /// Make Response with ownership of Req.
 /// The Output type is what returns from [handler_service] function.
@@ -221,10 +256,41 @@ macro_rules! responder_impl {
     }
 }
 
+#[allow(non_snake_case)]
+impl<Req, A, B, C, D> Responder<Req> for (A, B, C, D)
+where
+    A: Responder<Req>,
+    B: Responder<Req, Response = A::Response>,
+    A::Error: From<B::Error>,
+    C: Responder<Req, Response = A::Response>,
+    A::Error: From<C::Error>,
+    D: Responder<Req, Response = A::Response>,
+    A::Error: From<D::Error>,
+{
+    type Response = A::Response;
+    type Error = A::Error;
+    async fn respond(self, req: Req) -> Result<Self::Response, Self::Error> {
+        let (A, B, C, D) = self;
+        let res = A.respond(req).await?;
+        let res = B.map(res)?;
+        let res = C.map(res)?;
+        let res = D.map(res)?;
+        Ok(res)
+    }
+    fn map(self, mut res: Self::Response) -> Result<Self::Response, Self::Error> {
+        let (A, B, C, D) = self;
+        res = A.map(res)?;
+        res = B.map(res)?;
+        res = C.map(res)?;
+        res = D.map(res)?;
+        Ok(res)
+    }
+}
+
 responder_impl! { A, }
 responder_impl! { A, B, }
 responder_impl! { A, B, C, }
-responder_impl! { A, B, C, D, }
+// responder_impl! { A, B, C, D, }
 responder_impl! { A, B, C, D, E, }
 responder_impl! { A, B, C, D, E, F, }
 
@@ -273,8 +339,17 @@ macro_rules! borrow_req_impl {
 
 borrow_req_impl!(Method);
 borrow_req_impl!(Uri);
-borrow_req_impl!(HeaderMap);
+// borrow_req_impl!(HeaderMap);
 borrow_req_impl!(Extensions);
+
+impl<'a, Ext> FromRequest<'a, Request<Ext>> for &'a HeaderMap {
+    type Type<'b> = &'b HeaderMap;
+    type Error = Infallible;
+    #[inline]
+    async fn from_request(req: &'a Request<Ext>) -> Result<Self, Self::Error> {
+        Ok(req.borrow())
+    }
+}
 
 impl<'a, Ext> FromRequest<'a, Request<Ext>> for &'a Request<Ext>
 where
@@ -328,16 +403,42 @@ macro_rules! async_fn_impl {
     }
 }
 
-async_fn_impl! {}
+impl<Func, Fut, A, B, C, D> AsyncFn2<(A, B, C, D)> for Func
+where
+    Func: Fn(A, B, C, D) -> Fut,
+    Fut: Future,
+{
+    type Output = Fut::Output;
+    type Future = Fut;
+    #[inline]
+    fn call(&self, (A, B, C, D): (A, B, C, D)) -> Self::Future {
+        self(A, B, C, D)
+    }
+}
+
+// async_fn_impl! {}
 async_fn_impl! { A }
 async_fn_impl! { A, B }
 async_fn_impl! { A, B, C }
-async_fn_impl! { A, B, C, D }
+// async_fn_impl! { A, B, C, D }
 async_fn_impl! { A, B, C, D, E }
 async_fn_impl! { A, B, C, D, E, F }
 async_fn_impl! { A, B, C, D, E, F, G }
 async_fn_impl! { A, B, C, D, E, F, G, H }
 async_fn_impl! { A, B, C, D, E, F, G, H, I }
+
+impl<Func, Fut> AsyncFn2<()> for Func
+where
+    Func: Fn() -> Fut,
+    Fut: Future,
+{
+    type Output = Fut::Output;
+    type Future = Fut;
+    #[inline]
+    fn call(&self, (): ()) -> Self::Future {
+        self()
+    }
+}
 
 #[cfg(test)]
 mod test {

@@ -8,10 +8,10 @@ edition = "2024"
 crate-type = ["cdylib"]
 
 [dependencies]
-xitca-web = { version = "0.7", default-features = false, features = ["file-raw"] }
+xitca-web = { version = "0.7", default-features = false, features = ["file-raw"], path = "../../web" }
+http-file = { version = "0.2", default-features = false, path = "../../http-file" }
 
 console_error_panic_hook = { version = "0.1.1" }
-http-file = { version = "0.2", default-features = false }
 futures-util = { version = "0.3", default-features = false }
 rust-embed = "8"
 wasm-bindgen = "0.2.92"

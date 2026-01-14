@@ -294,7 +294,7 @@ impl<Obj, CF> App<AppRouter<Obj>, CF> {
     /// ```
     pub fn at<F, C, B>(mut self, path: &'static str, builder: F) -> Self
     where
-        F: RouteGen + Service + Send + Sync,
+        F: Service + Send + Sync + RouteGen,
         F::Response: for<'r> Service<WebContext<'r, C, B>>,
         for<'r> WebContext<'r, C, B>: IntoObject<F::Route<F>, (), Object = Obj>,
     {
@@ -460,38 +460,6 @@ where
         router
             .enclosed(crate::middleware::WebContext)
             .enclosed(ContextBuilder::new(ctx_builder.into_ctx()))
-    }
-
-    /// Finish App build. No other App method can be called afterwards.
-    pub fn finish_boxed<C, ResB, SE, BE>(
-        self,
-    ) -> AppObject<impl ReadyService + Service<WebRequest, Response = WebResponse, Error = Infallible>>
-    where
-        R: 'static,
-        R::Response:
-            ReadyService + for<'r> Service<WebContext<'r, C>, Response = WebResponse<ResB>, Error = SE> + 'static,
-        SE: for<'r> Service<WebContext<'r, C>, Response = WebResponse, Error = Infallible> + 'static,
-        ResB: Stream<Item = Result<Bytes, BE>> + 'static,
-        BE: error::Error + Send + Sync + 'static,
-        CF: IntoCtx<Ctx = C> + 'static,
-        C: 'static,
-    {
-        struct BoxApp<S>(S);
-
-        impl<S, Arg> Service<Arg> for BoxApp<S>
-        where
-            S: Service<Arg>,
-            S::Error: fmt::Debug + 'static,
-        {
-            type Response = S::Response;
-            type Error = Box<dyn fmt::Debug>;
-
-            async fn call(&self, arg: Arg) -> Result<Self::Response, Self::Error> {
-                self.0.call(arg).await.map_err(|e| Box::new(e) as _)
-            }
-        }
-
-        Box::new(BoxApp(self.finish().enclosed(TypeEraser::response_body())))
     }
 
     #[cfg(feature = "__server")]

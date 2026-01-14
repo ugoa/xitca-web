@@ -34,6 +34,7 @@ xitca-service = { path = "./service" }
 xitca-tls = { path = "./tls" }
 xitca-unsafe-collection = { path = "./unsafe_collection" }
 xitca-web = { path = "./web" }
+
 http-encoding = { path = "./http-encoding" }
 http-file = { path = "http-file" }
 http-multipart = { path = "./http-multipart" }

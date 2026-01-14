@@ -14,8 +14,24 @@ use crate::{
 
 use super::{Error, blank_error_service, error_from_service};
 
-error_from_service!(MatchError);
-blank_error_service!(MatchError, StatusCode::NOT_FOUND);
+// error_from_service!(MatchError);
+// blank_error_service!(MatchError, StatusCode::NOT_FOUND);
+
+impl<'r, C, B> Service<WebContext<'r, C, B>> for MatchError {
+    type Response = WebResponse;
+    type Error = Infallible;
+    async fn call(&self, ctx: WebContext<'r, C, B>) -> Result<Self::Response, Self::Error> {
+        let mut res = ctx.into_response(ResponseBody::empty());
+        *res.status_mut() = StatusCode::NOT_FOUND;
+        Ok(res)
+    }
+}
+
+impl From<MatchError> for crate::error::Error {
+    fn from(e: MatchError) -> Self {
+        Self::from_service(e)
+    }
+}
 
 error_from_service!(MethodNotAllowed);
 
